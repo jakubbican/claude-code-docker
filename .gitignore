@@ -1,0 +1,23 @@
+# Core dumps
+core
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local overrides
+docker-compose.override.yml
+*.local.yml
+
+# Logs
+*.log
+
+# Claude local settings
+.claude/

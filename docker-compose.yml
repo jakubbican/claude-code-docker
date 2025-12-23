@@ -1,0 +1,162 @@
+#===============================================================================
+# Docker Compose pro Claude Code Development Environment
+#===============================================================================
+# Spuštění:  docker compose up -d --build
+# Připojení: docker compose exec dev bash
+# Zastavení: docker compose down
+#
+# BEZPEČNOSTNÍ FEATURES:
+# - Firewall whitelist (pouze npm, GitHub, Anthropic API)
+# - Oddělený volume pro Claude credentials
+# - Non-root uživatel
+#===============================================================================
+
+services:
+  dev:
+    # Název kontejneru pro snadnější identifikaci
+    container_name: claude-code-dev
+    
+    # Build z lokálního Dockerfile
+    build:
+      context: .
+      dockerfile: Dockerfile
+    
+    # Restart policy - automaticky restartuj při pádu
+    restart: unless-stopped
+    
+    # Interaktivní mód (potřebné pro Claude Code)
+    stdin_open: true
+    tty: true
+    
+    #---------------------------------------------------------------------------
+    # CAPABILITIES - potřebné pro firewall
+    #---------------------------------------------------------------------------
+    cap_add:
+      - NET_ADMIN    # Nutné pro iptables (firewall pravidla)
+    
+    #---------------------------------------------------------------------------
+    # VOLUMES - co přežije restart/reset kontejneru
+    #---------------------------------------------------------------------------
+    volumes:
+      # Tvoje projekty - HLAVNÍ MOUNT
+      # Host ~/projects se mapuje na /workspace v kontejneru
+      - ~/projects:/workspace
+      
+      # Claude credentials a konfigurace - ODDĚLENÝ VOLUME
+      # Přežije reset kontejneru, nemusíš se znovu přihlašovat
+      - claude-config:/home/node/.claude
+      
+      # NPM cache - zrychlí npm install po restartu
+      - npm-cache:/home/node/.npm
+      
+      # Playwright browser cache - přežije restart
+      - playwright-cache:/opt/playwright-browsers
+      
+      # Git konfigurace z hosta (volitelné - odkomentuj pokud chceš)
+      # - ~/.gitconfig:/home/node/.gitconfig:ro
+      
+      # SSH klíče pro GitHub (volitelné - odkomentuj pokud chceš)
+      # - ~/.ssh:/home/node/.ssh:ro
+    
+    #---------------------------------------------------------------------------
+    # PORTY - přístup k dev serverům z laptopů
+    #---------------------------------------------------------------------------
+    ports:
+      # Vite/React dev server (výchozí port)
+      - "5173:5173"
+      
+      # Vite dev server - alternativní port pro canoe-scoreboard
+      - "3000:3000"
+      
+      # Next.js dev server
+      - "3001:3001"
+      
+      # Storybook (pokud budeš používat)
+      - "6006:6006"
+      
+      # Playwright report server
+      - "9323:9323"
+      
+      # WebSocket - CanoeLiveInterface (pro testování mock serveru)
+      - "8081:8081"
+      
+      # Další porty pro lokální služby/testování
+      - "8080:8080"
+      - "9000:9000"
+    
+    #---------------------------------------------------------------------------
+    # ENVIRONMENT - proměnné prostředí
+    #---------------------------------------------------------------------------
+    environment:
+      # Node.js
+      - NODE_ENV=development
+      
+      # Playwright
+      - PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers
+      
+      # Claude config location
+      - CLAUDE_CONFIG_DIR=/home/node/.claude
+      
+      #-------------------------------------------------------------------------
+      # FIREWALL KONFIGURACE
+      #-------------------------------------------------------------------------
+      # Zapnout/vypnout firewall (default: true)
+      - ENABLE_FIREWALL=true
+      
+      # Pokud true, kontejner se nespustí když firewall selže (default: false)
+      - FIREWALL_REQUIRED=false
+      
+      #-------------------------------------------------------------------------
+      # GIT (přepiš svými údaji!)
+      #-------------------------------------------------------------------------
+      - GIT_AUTHOR_NAME=Jakub Bican
+      - GIT_AUTHOR_EMAIL=jakub.bican@gmail.com
+      - GIT_COMMITTER_NAME=Jakub Bican
+      - GIT_COMMITTER_EMAIL=jakub.bican@gmail.com
+      
+      # Claude Code API klíč (VOLITELNÉ - můžeš nastavit zde nebo při spuštění)
+      # Pokud používáš Claude Pro/Max, nech zakomentované a přihlas se v CLI
+      # - ANTHROPIC_API_KEY=sk-ant-xxxxx
+      
+      # Timezone
+      - TZ=Europe/Prague
+    
+    #---------------------------------------------------------------------------
+    # NETWORK - síťová konfigurace
+    #---------------------------------------------------------------------------
+    networks:
+      - claude-net
+    
+    #---------------------------------------------------------------------------
+    # HEALTHCHECK - kontrola stavu
+    #---------------------------------------------------------------------------
+    healthcheck:
+      test: ["CMD", "node", "--version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+#===============================================================================
+# VOLUMES - definice pojmenovaných volumes
+#===============================================================================
+volumes:
+  # Claude credentials a session data
+  # DŮLEŽITÉ: Obsahuje přihlašovací údaje, přežije reset kontejneru
+  claude-config:
+    driver: local
+  
+  # NPM cache - zrychluje instalaci balíčků
+  npm-cache:
+    driver: local
+  
+  # Playwright cache - uchování staženého Chromium
+  playwright-cache:
+    driver: local
+
+#===============================================================================
+# NETWORKS - síťová konfigurace
+#===============================================================================
+networks:
+  claude-net:
+    driver: bridge

@@ -1,0 +1,17 @@
+# Documentation (not needed in image)
+*.md
+.git
+.gitignore
+.editorconfig
+
+# Local config
+.claude/
+*.local.yml
+docker-compose.override.yml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Crash files
+core
