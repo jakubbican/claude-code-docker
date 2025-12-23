@@ -28,27 +28,52 @@ ALLOWED_DOMAINS=(
     "statsig.anthropic.com"
     "sentry.io"
     "claude.ai"
-    
+
+    # Sentry (error reporting)
+    "ingest.sentry.io"
+    "o19718.ingest.sentry.io"
+    "o4504430941937664.ingest.sentry.io"
+
     # npm registry
     "registry.npmjs.org"
     "npmjs.org"
     "npmjs.com"
-    
+
+    # npm CDNs (used by some packages)
+    "unpkg.com"
+    "cdn.jsdelivr.net"
+
     # GitHub
     "github.com"
     "api.github.com"
     "raw.githubusercontent.com"
     "objects.githubusercontent.com"
     "codeload.github.com"
-    
+    "github-releases.githubusercontent.com"
+
     # Pro Playwright (stahování prohlížečů)
     "playwright.azureedge.net"
     "playwright-akamai.azureedge.net"
     "playwright-verizon.azureedge.net"
-    
+
     # Node.js / npm CDN
     "nodejs.org"
     "registry.yarnpkg.com"
+
+    # VS Code / Cursor Marketplace
+    "marketplace.visualstudio.com"
+    "gallerycdn.vsassets.io"
+    "vscode.blob.core.windows.net"
+    "update.code.visualstudio.com"
+
+    # Python / PyPI
+    "pypi.org"
+    "files.pythonhosted.org"
+
+    # Docker Hub
+    "registry-1.docker.io"
+    "auth.docker.io"
+    "production.cloudflare.docker.com"
 )
 
 #-------------------------------------------------------------------------------
