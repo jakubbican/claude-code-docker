@@ -15,10 +15,14 @@ Host (RPI 5)
 ├── ~/projects/              → Mounted as /workspace in container
 └── ~/claude-code-docker/    → This repo (Docker config)
 
-Container (claude-code-dev)
+Container (claude-code-dev)         ← Main instance (firewall ON)
 ├── Node.js 20, Claude Code, Playwright
 ├── iptables firewall (whitelist-only outbound)
 └── Volumes: claude-config, npm-cache, playwright-cache
+
+Container (claude-code-research)    ← Research instance (firewall OFF)
+├── Same setup, no firewall
+└── Shares volumes with main instance
 ```
 
 ## Quick Reference
@@ -39,6 +43,11 @@ docker compose down && docker compose up -d
 
 # Hard reset (clears everything)
 docker compose down -v && docker compose up -d --build
+
+# Research instance (no firewall, unrestricted internet)
+docker compose -f docker-compose.research.yml up -d
+docker compose -f docker-compose.research.yml exec dev bash
+docker compose -f docker-compose.research.yml down
 ```
 
 ## File Purposes
@@ -47,6 +56,7 @@ docker compose down -v && docker compose up -d --build
 |------|---------|
 | `Dockerfile` | Container image definition |
 | `docker-compose.yml` | Service config, volumes, ports, env vars |
+| `docker-compose.research.yml` | Research instance without firewall |
 | `init-firewall.sh` | Whitelist rules - edit `ALLOWED_DOMAINS` to add domains |
 | `entrypoint.sh` | Startup script (firewall init + validation) |
 | `setup-host.sh` | One-time RPI host preparation |

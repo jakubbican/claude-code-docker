@@ -1,0 +1,123 @@
+#===============================================================================
+# Docker Compose pro Claude Code - RESEARCH Instance (bez firewallu)
+#===============================================================================
+# Spuštění:  docker compose -f docker-compose.research.yml up -d
+# Připojení: docker compose -f docker-compose.research.yml exec dev bash
+# Zastavení: docker compose -f docker-compose.research.yml down
+#
+# ÚČEL: Instance bez firewallu pro research, browsing, analýzu
+# POZOR: Tato instance má neomezený přístup na internet!
+#===============================================================================
+
+services:
+  dev:
+    # Jiný název než hlavní instance
+    container_name: claude-code-research
+
+    # Build z lokálního Dockerfile
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Interaktivní mód (potřebné pro Claude Code)
+    stdin_open: true
+    tty: true
+
+    #---------------------------------------------------------------------------
+    # CAPABILITIES - stále potřebné (entrypoint očekává iptables)
+    #---------------------------------------------------------------------------
+    cap_add:
+      - NET_ADMIN
+
+    #---------------------------------------------------------------------------
+    # VOLUMES - sdílené s hlavní instancí
+    #---------------------------------------------------------------------------
+    volumes:
+      # Tvoje projekty - stejný mount jako hlavní instance
+      - ~/projects:/workspace
+
+      # Claude credentials - SDÍLENÉ s hlavní instancí
+      - claude-config:/home/node/.claude
+
+      # NPM cache - sdílené
+      - npm-cache:/home/node/.npm
+
+      # Playwright browser cache - sdílené
+      - playwright-cache:/opt/playwright-browsers
+
+    #---------------------------------------------------------------------------
+    # PORTY - žádné (není potřeba pro research)
+    #---------------------------------------------------------------------------
+    # ports: žádné
+
+    #---------------------------------------------------------------------------
+    # ENVIRONMENT - proměnné prostředí
+    #---------------------------------------------------------------------------
+    environment:
+      # Node.js
+      - NODE_ENV=development
+
+      # Playwright
+      - PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers
+
+      # Claude config location
+      - CLAUDE_CONFIG_DIR=/home/node/.claude
+
+      #-------------------------------------------------------------------------
+      # FIREWALL VYPNUTÝ - hlavní rozdíl oproti hlavní instanci
+      #-------------------------------------------------------------------------
+      - ENABLE_FIREWALL=false
+      - FIREWALL_REQUIRED=false
+
+      #-------------------------------------------------------------------------
+      # GIT
+      #-------------------------------------------------------------------------
+      - GIT_AUTHOR_NAME=Jakub Bican
+      - GIT_AUTHOR_EMAIL=jakub.bican@gmail.com
+      - GIT_COMMITTER_NAME=Jakub Bican
+      - GIT_COMMITTER_EMAIL=jakub.bican@gmail.com
+
+      # Timezone
+      - TZ=Europe/Prague
+
+    #---------------------------------------------------------------------------
+    # NETWORK
+    #---------------------------------------------------------------------------
+    networks:
+      - claude-net
+
+    #---------------------------------------------------------------------------
+    # HEALTHCHECK
+    #---------------------------------------------------------------------------
+    healthcheck:
+      test: ["CMD", "node", "--version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+#===============================================================================
+# VOLUMES - reference na existující volumes (sdílené s hlavní instancí)
+#===============================================================================
+volumes:
+  claude-config:
+    external: true
+    name: claude-code-docker_claude-config
+
+  npm-cache:
+    external: true
+    name: claude-code-docker_npm-cache
+
+  playwright-cache:
+    external: true
+    name: claude-code-docker_playwright-cache
+
+#===============================================================================
+# NETWORKS
+#===============================================================================
+networks:
+  claude-net:
+    driver: bridge

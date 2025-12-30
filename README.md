@@ -24,6 +24,37 @@ Kompletní průvodce nastavením izolovaného vývojového prostředí pro Claud
 | `entrypoint.sh` | Startup script s validací |
 | `DOCKER-GUIDE.md` | Podrobný průvodce Docker příkazy |
 | `CLAUDE.md.template` | Šablona instrukcí pro Claude Code |
+| `docker-compose.research.yml` | Research instance bez firewallu |
+
+---
+
+## Více instancí
+
+Můžeš spustit dvě instance současně:
+
+| Instance | Compose soubor | Firewall | Účel |
+|----------|----------------|----------|------|
+| **Hlavní** | `docker-compose.yml` | Zapnutý | Vývoj, autonomní režim |
+| **Research** | `docker-compose.research.yml` | Vypnutý | Browsing, research, analýza |
+
+### Spuštění research instance
+
+```bash
+# Spustit (hlavní instance musí běžet jako první - vytváří volumes)
+docker compose -f docker-compose.research.yml up -d
+
+# Připojit se
+docker compose -f docker-compose.research.yml exec dev bash
+
+# Zastavit
+docker compose -f docker-compose.research.yml down
+```
+
+Research instance:
+- Sdílí credentials s hlavní instancí
+- Sdílí mount `~/projects:/workspace`
+- Nemá mapované porty (nepotřebuje dev servery)
+- **Má neomezený přístup na internet**
 
 ---
 
