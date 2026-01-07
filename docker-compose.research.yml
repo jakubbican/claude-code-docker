@@ -2,7 +2,7 @@
 # Docker Compose pro Claude Code - RESEARCH Instance (bez firewallu)
 #===============================================================================
 # Spuštění:  docker compose -f docker-compose.research.yml up -d
-# Připojení: docker compose -f docker-compose.research.yml exec dev bash
+# Připojení: docker compose -f docker-compose.research.yml exec research bash
 # Zastavení: docker compose -f docker-compose.research.yml down
 #
 # ÚČEL: Instance bez firewallu pro research, browsing, analýzu
@@ -10,7 +10,7 @@
 #===============================================================================
 
 services:
-  dev:
+  research:
     # Jiný název než hlavní instance
     container_name: claude-code-research
 
@@ -38,6 +38,9 @@ services:
     volumes:
       # Tvoje projekty - stejný mount jako hlavní instance
       - ~/projects:/workspace
+
+      # Vedlejší projekty - pouze pro research instanci
+      - ~/projects_side:/workspace_side
 
       # Claude credentials - SDÍLENÉ s hlavní instancí
       - claude-config:/home/node/.claude
@@ -87,7 +90,7 @@ services:
     # NETWORK
     #---------------------------------------------------------------------------
     networks:
-      - claude-net
+      - research-net
 
     #---------------------------------------------------------------------------
     # HEALTHCHECK
@@ -119,5 +122,5 @@ volumes:
 # NETWORKS
 #===============================================================================
 networks:
-  claude-net:
+  research-net:
     driver: bridge

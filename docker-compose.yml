@@ -41,7 +41,10 @@ services:
       # Tvoje projekty - HLAVNÍ MOUNT
       # Host ~/projects se mapuje na /workspace v kontejneru
       - ~/projects:/workspace
-      
+
+      # Vedlejší projekty
+      - ~/projects_side:/workspace_side
+
       # Claude credentials a konfigurace - ODDĚLENÝ VOLUME
       # Přežije reset kontejneru, nemusíš se znovu přihlašovat
       - claude-config:/home/node/.claude

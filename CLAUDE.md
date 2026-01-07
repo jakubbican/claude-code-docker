@@ -46,7 +46,7 @@ docker compose down -v && docker compose up -d --build
 
 # Research instance (no firewall, unrestricted internet)
 docker compose -f docker-compose.research.yml up -d
-docker compose -f docker-compose.research.yml exec dev bash
+docker compose -f docker-compose.research.yml exec research bash
 docker compose -f docker-compose.research.yml down
 ```
 

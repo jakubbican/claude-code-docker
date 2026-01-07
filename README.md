@@ -32,27 +32,53 @@ Kompletní průvodce nastavením izolovaného vývojového prostředí pro Claud
 
 Můžeš spustit dvě instance současně:
 
-| Instance | Compose soubor | Firewall | Účel |
-|----------|----------------|----------|------|
-| **Hlavní** | `docker-compose.yml` | Zapnutý | Vývoj, autonomní režim |
-| **Research** | `docker-compose.research.yml` | Vypnutý | Browsing, research, analýza |
+| Instance | Compose soubor | Služba | Firewall | Účel |
+|----------|----------------|--------|----------|------|
+| **Hlavní** | `docker-compose.yml` | `dev` | Zapnutý | Vývoj, autonomní režim |
+| **Research** | `docker-compose.research.yml` | `research` | Vypnutý | Browsing, research, analýza |
 
-### Spuštění research instance
+### Spuštění obou instancí
 
 ```bash
-# Spustit (hlavní instance musí běžet jako první - vytváří volumes)
+# 1. Spustit HLAVNÍ instanci (musí běžet první - vytváří volumes)
+docker compose up -d
+
+# 2. Spustit RESEARCH instanci
 docker compose -f docker-compose.research.yml up -d
 
-# Připojit se
-docker compose -f docker-compose.research.yml exec dev bash
-
-# Zastavit
-docker compose -f docker-compose.research.yml down
+# Ověření - obě běží současně
+docker ps
+# Měl bys vidět: claude-code-dev a claude-code-research
 ```
 
-Research instance:
-- Sdílí credentials s hlavní instancí
+### Připojení do instancí
+
+```bash
+# Připojit se do HLAVNÍ instance (s firewallem)
+docker compose exec dev bash
+
+# Připojit se do RESEARCH instance (bez firewallu)
+docker compose -f docker-compose.research.yml exec research bash
+```
+
+### Zastavení
+
+```bash
+# Zastavit HLAVNÍ instanci
+docker compose down
+
+# Zastavit RESEARCH instanci
+docker compose -f docker-compose.research.yml down
+
+# Zastavit OBĚ najednou
+docker compose down && docker compose -f docker-compose.research.yml down
+```
+
+### Research instance - vlastnosti
+
+- Sdílí credentials s hlavní instancí (stejný login)
 - Sdílí mount `~/projects:/workspace`
+- Extra mount `~/projects_side:/workspace_side` pro vedlejší projekty
 - Nemá mapované porty (nepotřebuje dev servery)
 - **Má neomezený přístup na internet**
 
