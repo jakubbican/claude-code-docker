@@ -46,6 +46,18 @@ else
 fi
 
 #-------------------------------------------------------------------------------
+# Inicializace bash history adresáře
+#-------------------------------------------------------------------------------
+if [ -n "${HISTFILE}" ]; then
+    HIST_DIR=$(dirname "${HISTFILE}")
+    if [ ! -d "${HIST_DIR}" ]; then
+        mkdir -p "${HIST_DIR}"
+    fi
+    # Vytvoř prázdný soubor pokud neexistuje
+    touch "${HISTFILE}" 2>/dev/null || true
+fi
+
+#-------------------------------------------------------------------------------
 # Informace o prostředí
 #-------------------------------------------------------------------------------
 echo ""
@@ -53,6 +65,7 @@ echo -e "${GREEN}[INFO]${NC} Node.js: $(node --version)"
 echo -e "${GREEN}[INFO]${NC} npm: $(npm --version)"
 echo -e "${GREEN}[INFO]${NC} Claude Code: $(claude --version 2>/dev/null || echo 'checking...')"
 echo -e "${GREEN}[INFO]${NC} Git: $(git --version)"
+echo -e "${GREEN}[INFO]${NC} gh CLI: $(gh --version 2>/dev/null | head -1 || echo 'not installed')"
 echo -e "${GREEN}[INFO]${NC} Workspace: /workspace"
 echo -e "${GREEN}[INFO]${NC} Claude config: ${CLAUDE_CONFIG_DIR:-/home/node/.claude}"
 echo ""
@@ -65,6 +78,26 @@ if [ -f "${CLAUDE_CONFIG_DIR:-/home/node/.claude}/.credentials.json" ]; then
 else
     echo -e "${YELLOW}[INFO]${NC} Claude credentials nenalezeny"
     echo -e "${YELLOW}[INFO]${NC} Při prvním spuštění 'claude' budeš vyzván k přihlášení"
+fi
+
+#-------------------------------------------------------------------------------
+# Kontrola SSH klíčů
+#-------------------------------------------------------------------------------
+if [ -f "/home/node/.ssh/id_ed25519" ] || [ -f "/home/node/.ssh/id_rsa" ]; then
+    echo -e "${GREEN}[INFO]${NC} SSH klíče nalezeny ✓"
+else
+    echo -e "${YELLOW}[INFO]${NC} SSH klíče nenalezeny"
+    echo -e "${YELLOW}[INFO]${NC} Pro GitHub: zkopíruj klíče do /home/node/.ssh/ nebo viz keysbackup/INSTRUCTIONS.md"
+fi
+
+#-------------------------------------------------------------------------------
+# Kontrola gh CLI credentials
+#-------------------------------------------------------------------------------
+if [ -f "/home/node/.config/gh/hosts.yml" ]; then
+    echo -e "${GREEN}[INFO]${NC} GitHub CLI credentials nalezeny ✓"
+else
+    echo -e "${YELLOW}[INFO]${NC} GitHub CLI credentials nenalezeny"
+    echo -e "${YELLOW}[INFO]${NC} Pro přihlášení spusť: gh auth login"
 fi
 
 echo ""

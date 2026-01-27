@@ -16,13 +16,13 @@ Host (RPI 5)
 └── ~/claude-code-docker/    → This repo (Docker config)
 
 Container (claude-code-dev)         ← Main instance (firewall ON)
-├── Node.js 20, Claude Code, Playwright
+├── Node.js 20, Claude Code, gh CLI, Playwright
 ├── iptables firewall (whitelist-only outbound)
-└── Volumes: claude-config, npm-cache, playwright-cache
+└── Volumes: claude-config, npm-cache, playwright-cache, ssh-keys, gh-config, bash-history
 
 Container (claude-code-research)    ← Research instance (firewall OFF)
 ├── Same setup, no firewall
-└── Shares volumes with main instance
+└── Shares all volumes with main instance
 ```
 
 ## Quick Reference
@@ -54,12 +54,24 @@ docker compose -f docker-compose.research.yml down
 
 | File | Purpose |
 |------|---------|
-| `Dockerfile` | Container image definition |
+| `Dockerfile` | Container image definition (Node.js, Claude Code, gh CLI, Playwright) |
 | `docker-compose.yml` | Service config, volumes, ports, env vars |
 | `docker-compose.research.yml` | Research instance without firewall |
 | `init-firewall.sh` | Whitelist rules - edit `ALLOWED_DOMAINS` to add domains |
 | `entrypoint.sh` | Startup script (firewall init + validation) |
 | `setup-host.sh` | One-time RPI host preparation |
+| `keysbackup/` | SSH keys backup (not in git) - see INSTRUCTIONS.md inside |
+
+## Persistent Volumes
+
+| Volume | Purpose |
+|--------|---------|
+| `claude-config` | Claude Code credentials and session |
+| `npm-cache` | npm packages cache |
+| `playwright-cache` | Chromium browser |
+| `ssh-keys` | SSH keys for Git/GitHub |
+| `gh-config` | GitHub CLI credentials |
+| `bash-history` | Shell command history |
 
 ## Firewall
 

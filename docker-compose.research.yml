@@ -51,6 +51,15 @@ services:
       # Playwright browser cache - sdílené
       - playwright-cache:/opt/playwright-browsers
 
+      # SSH klíče - sdílené
+      - ssh-keys:/home/node/.ssh
+
+      # GitHub CLI config - sdílené
+      - gh-config:/home/node/.config/gh
+
+      # Bash history - sdílené
+      - bash-history:/home/node/.bash_history_dir
+
     #---------------------------------------------------------------------------
     # PORTY - žádné (není potřeba pro research)
     #---------------------------------------------------------------------------
@@ -86,6 +95,11 @@ services:
       # Timezone
       - TZ=Europe/Prague
 
+      # Bash history - ukládá do persistent volume
+      - HISTFILE=/home/node/.bash_history_dir/.bash_history
+      - HISTSIZE=10000
+      - HISTFILESIZE=20000
+
     #---------------------------------------------------------------------------
     # NETWORK
     #---------------------------------------------------------------------------
@@ -117,6 +131,18 @@ volumes:
   playwright-cache:
     external: true
     name: claude-code-docker_playwright-cache
+
+  ssh-keys:
+    external: true
+    name: claude-code-docker_ssh-keys
+
+  gh-config:
+    external: true
+    name: claude-code-docker_gh-config
+
+  bash-history:
+    external: true
+    name: claude-code-docker_bash-history
 
 #===============================================================================
 # NETWORKS

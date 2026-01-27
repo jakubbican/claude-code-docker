@@ -11,6 +11,16 @@ Kompletní průvodce nastavením izolovaného vývojového prostředí pro Claud
 | 👤 **Non-root user** | Claude Code běží pod neprivilegovaným uživatelem |
 | 📦 **Izolace** | Kontejner oddělený od host systému |
 
+## Nástroje v kontejneru
+
+| Nástroj | Účel |
+|---------|------|
+| **Node.js 20** | Runtime pro JavaScript/TypeScript |
+| **Claude Code** | AI asistent pro kódování |
+| **gh CLI** | GitHub CLI pro práci s issues, PR, repos |
+| **Playwright** | E2E testování s headless Chromium |
+| **Git** | Verzování |
+
 ---
 
 ## Obsah balíčku
@@ -18,13 +28,13 @@ Kompletní průvodce nastavením izolovaného vývojového prostředí pro Claud
 | Soubor | Účel |
 |--------|------|
 | `setup-host.sh` | Skript pro přípravu RPI (Docker, složky) |
-| `Dockerfile` | Definice vývojového prostředí |
-| `docker-compose.yml` | Konfigurace kontejneru |
+| `Dockerfile` | Definice vývojového prostředí (Node.js, Claude Code, gh CLI, Playwright) |
+| `docker-compose.yml` | Konfigurace hlavního kontejneru |
+| `docker-compose.research.yml` | Research instance bez firewallu |
 | `init-firewall.sh` | Firewall whitelist pravidla |
 | `entrypoint.sh` | Startup script s validací |
 | `DOCKER-GUIDE.md` | Podrobný průvodce Docker příkazy |
-| `CLAUDE.md.template` | Šablona instrukcí pro Claude Code |
-| `docker-compose.research.yml` | Research instance bez firewallu |
+| `keysbackup/` | Záloha SSH klíčů (není v gitu) |
 
 ---
 
@@ -190,6 +200,36 @@ claude
 # Credentials se uloží do volume a přežijí restart
 ```
 
+### 10. Nastavení SSH klíčů pro GitHub
+
+```bash
+# V kontejneru - vygeneruj nový klíč
+ssh-keygen -t ed25519 -C "tvuj@email.cz"
+
+# Zobraz veřejný klíč
+cat ~/.ssh/id_ed25519.pub
+
+# Přidej klíč do GitHub: Settings → SSH and GPG keys → New SSH key
+
+# Ověř připojení
+ssh -T git@github.com
+```
+
+**Tip:** SSH klíče jsou v persistent volume `ssh-keys` a přežijí restart/rebuild kontejneru.
+
+### 11. Přihlášení do GitHub CLI
+
+```bash
+# V kontejneru
+gh auth login
+# Vyber: GitHub.com → SSH → Login with a web browser
+
+# Ověř
+gh auth status
+```
+
+**Tip:** gh credentials jsou v persistent volume `gh-config`.
+
 ---
 
 ## Firewall - Co je povoleno
@@ -248,9 +288,12 @@ V `docker-compose.yml` změň:
 | Volume | Obsah | Reset level |
 |--------|-------|-------------|
 | `~/projects` | Tvůj kód | Nikdy se nesmaže |
-| `claude-config` | Login, session | Přežije restart i `down` |
+| `claude-config` | Claude login, session | Přežije restart i `down` |
 | `npm-cache` | npm balíčky | Přežije restart i `down` |
 | `playwright-cache` | Chromium | Přežije restart i `down` |
+| `ssh-keys` | SSH klíče pro Git/GitHub | Přežije restart i `down` |
+| `gh-config` | GitHub CLI credentials | Přežije restart i `down` |
+| `bash-history` | Historie příkazů | Přežije restart i `down` |
 
 ### Úrovně resetu
 

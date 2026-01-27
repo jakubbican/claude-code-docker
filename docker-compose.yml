@@ -54,12 +54,18 @@ services:
       
       # Playwright browser cache - přežije restart
       - playwright-cache:/opt/playwright-browsers
-      
+
+      # SSH klíče pro GitHub - persistent volume
+      - ssh-keys:/home/node/.ssh
+
+      # GitHub CLI config (gh auth login) - přežije restart
+      - gh-config:/home/node/.config/gh
+
+      # Bash history - přežije restart
+      - bash-history:/home/node/.bash_history_dir
+
       # Git konfigurace z hosta (volitelné - odkomentuj pokud chceš)
       # - ~/.gitconfig:/home/node/.gitconfig:ro
-      
-      # SSH klíče pro GitHub (volitelné - odkomentuj pokud chceš)
-      # - ~/.ssh:/home/node/.ssh:ro
     
     #---------------------------------------------------------------------------
     # PORTY - přístup k dev serverům z laptopů
@@ -123,6 +129,11 @@ services:
       
       # Timezone
       - TZ=Europe/Prague
+
+      # Bash history - ukládá do persistent volume
+      - HISTFILE=/home/node/.bash_history_dir/.bash_history
+      - HISTSIZE=10000
+      - HISTFILESIZE=20000
     
     #---------------------------------------------------------------------------
     # NETWORK - síťová konfigurace
@@ -155,6 +166,18 @@ volumes:
   
   # Playwright cache - uchování staženého Chromium
   playwright-cache:
+    driver: local
+
+  # SSH klíče pro GitHub
+  ssh-keys:
+    driver: local
+
+  # GitHub CLI credentials
+  gh-config:
+    driver: local
+
+  # Bash history persistence
+  bash-history:
     driver: local
 
 #===============================================================================
