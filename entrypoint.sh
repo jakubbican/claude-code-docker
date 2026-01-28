@@ -46,15 +46,25 @@ else
 fi
 
 #-------------------------------------------------------------------------------
-# Inicializace bash history adresáře
+# Inicializace bash history (persistent across rebuilds)
 #-------------------------------------------------------------------------------
-if [ -n "${HISTFILE}" ]; then
-    HIST_DIR=$(dirname "${HISTFILE}")
-    if [ ! -d "${HIST_DIR}" ]; then
-        mkdir -p "${HIST_DIR}"
-    fi
-    # Vytvoř prázdný soubor pokud neexistuje
-    touch "${HISTFILE}" 2>/dev/null || true
+HIST_DIR="/home/node/.bash_history_dir"
+HIST_FILE="${HIST_DIR}/.bash_history"
+
+# Vytvoř adresář a soubor
+mkdir -p "${HIST_DIR}" 2>/dev/null || true
+touch "${HIST_FILE}" 2>/dev/null || true
+
+# Přidej HISTFILE do ~/.bashrc pokud tam ještě není
+if ! grep -q "HISTFILE=${HIST_FILE}" /home/node/.bashrc 2>/dev/null; then
+    cat >> /home/node/.bashrc << EOF
+
+# Persistent bash history (added by entrypoint.sh)
+export HISTFILE=${HIST_FILE}
+export HISTSIZE=10000
+export HISTFILESIZE=20000
+EOF
+    echo -e "${GREEN}[STARTUP]${NC} HISTFILE přidán do ~/.bashrc"
 fi
 
 #-------------------------------------------------------------------------------
