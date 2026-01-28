@@ -137,9 +137,14 @@ USER node
 WORKDIR /home/node
 
 #-------------------------------------------------------------------------------
-# 9. Instalace Claude Code
+# 9. Instalace Claude Code (nativní binárka)
 #-------------------------------------------------------------------------------
-RUN npm install -g @anthropic-ai/claude-code
+# NPM metoda je deprecated, používáme nativní instalaci
+# https://code.claude.com/docs/en/setup
+RUN curl -fsSL https://claude.ai/install.sh | bash -s latest
+
+# Přidej do PATH
+ENV PATH=/home/node/.local/bin:$PATH
 
 #-------------------------------------------------------------------------------
 # 10. Instalace Playwright (globálně + prohlížeče)
