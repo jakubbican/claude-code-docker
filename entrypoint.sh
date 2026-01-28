@@ -51,9 +51,10 @@ fi
 HIST_DIR="/home/node/.bash_history_dir"
 HIST_FILE="${HIST_DIR}/.bash_history"
 
-# Vytvoř adresář a soubor
-mkdir -p "${HIST_DIR}" 2>/dev/null || true
-touch "${HIST_FILE}" 2>/dev/null || true
+# Vytvoř adresář a soubor se správnými právy (jako root, pak změň vlastníka)
+sudo mkdir -p "${HIST_DIR}" 2>/dev/null || true
+sudo touch "${HIST_FILE}" 2>/dev/null || true
+sudo chown -R node:node "${HIST_DIR}" 2>/dev/null || true
 
 # Přidej HISTFILE do ~/.bashrc pokud tam ještě není
 if ! grep -q "HISTFILE=${HIST_FILE}" /home/node/.bashrc 2>/dev/null; then
