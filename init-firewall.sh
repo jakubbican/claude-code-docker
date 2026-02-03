@@ -66,9 +66,10 @@ ALLOWED_DOMAINS=(
     "vscode.blob.core.windows.net"
     "update.code.visualstudio.com"
 
-    # Python / PyPI
+    # Python / PyPI / uv
     "pypi.org"
     "files.pythonhosted.org"
+    "astral.sh"
 
     # Docker Hub
     "registry-1.docker.io"
