@@ -43,7 +43,7 @@ ALLOWED_DOMAINS=(
     "unpkg.com"
     "cdn.jsdelivr.net"
 
-    # GitHub
+    # GitHub - domény pro DNS fallback (IP rozsahy jsou níže)
     "github.com"
     "api.github.com"
     "raw.githubusercontent.com"
@@ -191,6 +191,46 @@ log_info "  ✓ Multicast (224.0.0.0/4)"
 log_info "Povoluji SSH (port 22)..."
 
 iptables -A OUTPUT -p tcp --dport 22 -j ACCEPT
+
+#-------------------------------------------------------------------------------
+# Povolení GitHub IP rozsahů (statické - neměnné)
+#-------------------------------------------------------------------------------
+# GitHub používá load balancing a IP adresy se mění.
+# Místo DNS resolvování používáme oficiální IP rozsahy z https://api.github.com/meta
+# Toto zajistí stabilní připojení i když se DNS změní.
+#-------------------------------------------------------------------------------
+log_info "Povoluji GitHub IP rozsahy (z api.github.com/meta)..."
+
+# Hlavní GitHub rozsahy (api, web, git)
+GITHUB_IP_RANGES=(
+    "192.30.252.0/22"
+    "185.199.108.0/22"
+    "140.82.112.0/20"
+    "143.55.64.0/20"
+    # Azure-hosted GitHub services
+    "20.201.28.0/24"
+    "20.205.243.0/24"
+    "20.87.245.0/24"
+    "20.207.73.0/24"
+    "20.27.177.0/24"
+    "20.200.245.0/24"
+    "20.175.192.0/24"
+    "20.233.83.0/24"
+    "20.29.134.0/24"
+    "20.199.39.0/24"
+    "20.217.135.0/24"
+    "20.26.156.0/24"
+    "4.237.22.0/24"
+    "4.228.31.0/24"
+    "4.225.11.0/24"
+    "4.208.26.0/24"
+)
+
+for range in "${GITHUB_IP_RANGES[@]}"; do
+    iptables -A OUTPUT -p tcp --dport 443 -d "$range" -j ACCEPT
+    iptables -A OUTPUT -p tcp --dport 80 -d "$range" -j ACCEPT
+    log_info "  ✓ GitHub: $range"
+done
 
 #-------------------------------------------------------------------------------
 # Povolení HTTPS (port 443) na whitelisted domény
