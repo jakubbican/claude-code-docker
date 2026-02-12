@@ -161,6 +161,10 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 # Přidej do PATH (.local/bin pro Claude Code i uv)
 ENV PATH=/home/node/.local/bin:$PATH
 
+# Instalace specify-cli (GitHub spec-kit)
+# https://github.com/github/spec-kit
+RUN uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
+
 #-------------------------------------------------------------------------------
 # 12. Instalace devtui (all-in-one terminal toolkit)
 #-------------------------------------------------------------------------------
@@ -185,19 +189,25 @@ RUN npm install -g playwright && \
     npx playwright install chromium
 
 #-------------------------------------------------------------------------------
-# 14. Konfigurace Gitu
+# 14. Instalace Gemini CLI (Google AI agent pro terminál)
+#-------------------------------------------------------------------------------
+# https://github.com/google-gemini/gemini-cli
+RUN npm install -g @google/gemini-cli
+
+#-------------------------------------------------------------------------------
+# 15. Konfigurace Gitu
 #-------------------------------------------------------------------------------
 RUN git config --global init.defaultBranch main && \
     git config --global core.editor "vim" && \
     git config --global pull.rebase false
 
 #-------------------------------------------------------------------------------
-# 15. Pracovní adresář pro projekty
+# 16. Pracovní adresář pro projekty
 #-------------------------------------------------------------------------------
 WORKDIR /workspace
 
 #-------------------------------------------------------------------------------
-# 16. Výchozí příkaz - entrypoint s firewall inicializací
+# 17. Výchozí příkaz - entrypoint s firewall inicializací
 #-------------------------------------------------------------------------------
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["tail", "-f", "/dev/null"]
