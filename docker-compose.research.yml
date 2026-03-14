@@ -57,6 +57,9 @@ services:
       # GitHub CLI config - sdílené
       - gh-config:/home/node/.config/gh
 
+      # Gemini CLI config - sdílené
+      - gemini-config:/home/node/.gemini
+
       # Bash history - sdílené
       - bash-history:/home/node/.bash_history_dir
 
@@ -139,6 +142,10 @@ volumes:
   gh-config:
     external: true
     name: claude-code-docker_gh-config
+
+  gemini-config:
+    external: true
+    name: claude-code-docker_gemini-config
 
   bash-history:
     external: true

@@ -71,6 +71,17 @@ ALLOWED_DOMAINS=(
     "files.pythonhosted.org"
     "astral.sh"
 
+    # Google AI / Gemini CLI
+    "generativelanguage.googleapis.com"
+    "aistudio.google.com"
+    "oauth2.googleapis.com"
+    "accounts.google.com"
+    "www.googleapis.com"
+
+    # Claude Code auto-update
+    "downloads.anthropic.com"
+    "binaries.anthropic.com"
+
     # Docker Hub
     "registry-1.docker.io"
     "auth.docker.io"

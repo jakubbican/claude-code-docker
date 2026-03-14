@@ -61,6 +61,9 @@ services:
       # GitHub CLI config (gh auth login) - přežije restart
       - gh-config:/home/node/.config/gh
 
+      # Gemini CLI config a credentials - přežije restart
+      - gemini-config:/home/node/.gemini
+
       # Bash history - přežije restart
       - bash-history:/home/node/.bash_history_dir
 
@@ -174,6 +177,10 @@ volumes:
 
   # GitHub CLI credentials
   gh-config:
+    driver: local
+
+  # Gemini CLI config a credentials
+  gemini-config:
     driver: local
 
   # Bash history persistence
