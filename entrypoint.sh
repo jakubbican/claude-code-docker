@@ -56,6 +56,9 @@ sudo mkdir -p "${HIST_DIR}" 2>/dev/null || true
 sudo touch "${HIST_FILE}" 2>/dev/null || true
 sudo chown -R node:node "${HIST_DIR}" 2>/dev/null || true
 
+# Fix permissions na Gemini CLI volume
+sudo chown -R node:node /home/node/.gemini 2>/dev/null || true
+
 # Přidej HISTFILE do ~/.bashrc pokud tam ještě není
 if ! grep -q "HISTFILE=${HIST_FILE}" /home/node/.bashrc 2>/dev/null; then
     cat >> /home/node/.bashrc << EOF
@@ -109,6 +112,16 @@ if [ -f "/home/node/.config/gh/hosts.yml" ]; then
 else
     echo -e "${YELLOW}[INFO]${NC} GitHub CLI credentials nenalezeny"
     echo -e "${YELLOW}[INFO]${NC} Pro přihlášení spusť: gh auth login"
+fi
+
+#-------------------------------------------------------------------------------
+# Kontrola Gemini CLI credentials
+#-------------------------------------------------------------------------------
+if [ -f "/home/node/.gemini/settings.json" ]; then
+    echo -e "${GREEN}[INFO]${NC} Gemini CLI config nalezen ✓"
+else
+    echo -e "${YELLOW}[INFO]${NC} Gemini CLI config nenalezen"
+    echo -e "${YELLOW}[INFO]${NC} Pro přihlášení spusť: gemini"
 fi
 
 echo ""
