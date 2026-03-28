@@ -162,20 +162,7 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH=/home/node/.local/bin:$PATH
 
 #-------------------------------------------------------------------------------
-# 12. Instalace devtui (all-in-one terminal toolkit)
-#-------------------------------------------------------------------------------
-# https://github.com/skatkov/devtui
-USER root
-RUN DEVTUI_VERSION="0.34.0" && \
-    curl -fsSL "https://github.com/skatkov/devtui/releases/download/v${DEVTUI_VERSION}/devtui_Linux_arm64.tar.gz" -o /tmp/devtui.tar.gz && \
-    tar -xzf /tmp/devtui.tar.gz -C /tmp && \
-    mv /tmp/devtui /usr/local/bin/devtui && \
-    chmod +x /usr/local/bin/devtui && \
-    rm -rf /tmp/devtui.tar.gz /tmp/LICENSE /tmp/README.md
-USER node
-
-#-------------------------------------------------------------------------------
-# 13. Instalace Playwright (globálně + prohlížeče)
+# 12. Instalace Playwright (globálně + prohlížeče)
 #-------------------------------------------------------------------------------
 USER root
 RUN mkdir -p /opt/playwright-browsers && chown -R node:node /opt/playwright-browsers
@@ -185,31 +172,31 @@ RUN npm install -g playwright && \
     npx playwright install chromium
 
 #-------------------------------------------------------------------------------
-# 14. Gemini CLI config adresář (bude volume)
+# 13. Gemini CLI config adresář (bude volume)
 #-------------------------------------------------------------------------------
 RUN mkdir -p /home/node/.gemini && \
     chown -R node:node /home/node/.gemini
 
 #-------------------------------------------------------------------------------
-# 15. Instalace Gemini CLI (Google AI agent pro terminál)
+# 14. Instalace Gemini CLI (Google AI agent pro terminál)
 #-------------------------------------------------------------------------------
 # https://github.com/google-gemini/gemini-cli
 RUN npm install -g @google/gemini-cli
 
 #-------------------------------------------------------------------------------
-# 17. Konfigurace Gitu
+# 15. Konfigurace Gitu
 #-------------------------------------------------------------------------------
 RUN git config --global init.defaultBranch main && \
     git config --global core.editor "vim" && \
     git config --global pull.rebase false
 
 #-------------------------------------------------------------------------------
-# 18. Pracovní adresář pro projekty
+# 16. Pracovní adresář pro projekty
 #-------------------------------------------------------------------------------
 WORKDIR /workspace
 
 #-------------------------------------------------------------------------------
-# 19. Výchozí příkaz - entrypoint s firewall inicializací
+# 17. Výchozí příkaz - entrypoint s firewall inicializací
 #-------------------------------------------------------------------------------
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["tail", "-f", "/dev/null"]
