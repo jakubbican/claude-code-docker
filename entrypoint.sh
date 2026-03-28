@@ -71,6 +71,25 @@ EOF
     echo -e "${GREEN}[STARTUP]${NC} HISTFILE přidán do ~/.bashrc"
 fi
 
+# Přidej npm-global/bin do PATH (Dockerfile ENV se nepropisuje do interaktivních sessions)
+if ! grep -q "npm-global/bin" /home/node/.bashrc 2>/dev/null; then
+    cat >> /home/node/.bashrc << 'EOF'
+
+# npm global bin - gemini, codex, playwright CLIs (added by entrypoint.sh)
+export PATH="/home/node/.npm-global/bin:$PATH"
+EOF
+    echo -e "${GREEN}[STARTUP]${NC} npm-global/bin přidán do PATH"
+fi
+
+# Přidej totéž do .profile pro login shells
+if ! grep -q "npm-global/bin" /home/node/.profile 2>/dev/null; then
+    cat >> /home/node/.profile << 'EOF'
+
+# npm global bin - gemini, codex, playwright CLIs (added by entrypoint.sh)
+export PATH="/home/node/.npm-global/bin:$PATH"
+EOF
+fi
+
 #-------------------------------------------------------------------------------
 # Informace o prostředí
 #-------------------------------------------------------------------------------
@@ -115,10 +134,27 @@ else
 fi
 
 #-------------------------------------------------------------------------------
-# Kontrola Gemini CLI credentials
+# Kontrola Gemini CLI credentials + export GEMINI_API_KEY
 #-------------------------------------------------------------------------------
 if [ -f "/home/node/.gemini/settings.json" ]; then
     echo -e "${GREEN}[INFO]${NC} Gemini CLI config nalezen ✓"
+
+    # Gemini CLI vyžaduje GEMINI_API_KEY env var (nečte z settings.json v neinteraktivním režimu)
+    # Extrahuj klíč a exportuj do prostředí + .bashrc
+    GEMINI_KEY=$(node -e "try{const s=require('/home/node/.gemini/settings.json');console.log(s?.security?.auth?.geminiApiKey||'')}catch{}" 2>/dev/null)
+    if [ -n "$GEMINI_KEY" ]; then
+        export GEMINI_API_KEY="$GEMINI_KEY"
+        # Přidej do .bashrc a .profile pro interaktivní i login sessions
+        GEMINI_EXPORT_LINE='export GEMINI_API_KEY="$(node -e "try{const s=require('"'"'/home/node/.gemini/settings.json'"'"');console.log(s?.security?.auth?.geminiApiKey||'"'"''"'"')}catch{}" 2>/dev/null)"'
+        for RC_FILE in /home/node/.bashrc /home/node/.profile; do
+            if ! grep -q "export GEMINI_API_KEY=" "$RC_FILE" 2>/dev/null; then
+                echo "" >> "$RC_FILE"
+                echo "# Gemini API key (loaded from settings.json by entrypoint.sh)" >> "$RC_FILE"
+                echo "$GEMINI_EXPORT_LINE" >> "$RC_FILE"
+            fi
+        done
+        echo -e "${GREEN}[INFO]${NC} GEMINI_API_KEY exportován do ~/.bashrc a ~/.profile"
+    fi
 else
     echo -e "${YELLOW}[INFO]${NC} Gemini CLI config nenalezen"
     echo -e "${YELLOW}[INFO]${NC} Pro přihlášení spusť: gemini"
